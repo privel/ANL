@@ -1,4 +1,5 @@
 import 'package:dolby/ui/auth/login_screen.dart';
+import 'package:dolby/ui/widgets/navigator_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -20,38 +21,43 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      // home: const MyHomePage(title: 'Dolby Normalno'),
-      home: LoginScreen(),
+      home: const MyHomePage(),
+      // home: LoginScreen(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int currentPageIndex = 0;
+
+  // Список экранов, на которые будет переключаться навигация
+  final List<Widget> pages = [
+    const Text(
+      "HOME",
+      style: TextStyle(color: Colors.white),
+    ),
+    const Text("search"),
+    const Text("My LIB"),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-          ],
-        ),
+      backgroundColor: const Color(0xFF1a1a1a),
+      body: pages[currentPageIndex],
+      bottomNavigationBar: CustomNavigationBar(
+        currentIndex: currentPageIndex,
+        onTap: (index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
       ),
     );
   }
