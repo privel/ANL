@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "216710139863",
+    "project_id": "dolby-aa3a5",
+    "storage_bucket": "dolby-aa3a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216710139863:android:1a4d9c41e39eb4ed9f0592",
+        "android_client_info": {
+          "package_name": "com.taskdone.dolby"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBe_jjH4nTe31q4j7mzvPRImMgn6PGYkcA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

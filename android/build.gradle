@@ -1,3 +1,15 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Заменяем на существующую версию Android Gradle Plugin
+        classpath 'com.android.tools.build:gradle:7.4.2'  // Или '8.2.1' если хотите обновиться
+        
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -5,14 +17,15 @@ allprojects {
     }
 }
 
+// Устанавливаем директорию для сборки проекта
 rootProject.buildDir = "../build"
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// Команда для очистки билда
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
