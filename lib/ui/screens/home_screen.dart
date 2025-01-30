@@ -1,7 +1,10 @@
+import 'package:dolby/providers/music_player_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:math';
+
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -81,23 +84,65 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     background: _buildWaveSection(),
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      const SizedBox(height: 30),
-                      _buildSectionTitle("🔥 Популярное"),
-                      _buildHorizontalList(),
-                      _buildSectionTitle("🎧 Рекомендуем"),
-                      _buildHorizontalList(),
-                      const SizedBox(height: 100),
-                    ],
-                  ),
+                _buildPopularAndRecommended(),
+                SliverToBoxAdapter(
+                  child: _buildCategories(), // ✅ Теперь безопасно
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 100),
                 ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPopularAndRecommended() {
+    return FutureBuilder<List<Track>>(
+      future: fetchTracks(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SliverToBoxAdapter(
+            child: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Ошибка: ${snapshot.error}',
+                style: const TextStyle(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Нет доступных треков',
+                style: TextStyle(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index == 0) return null;
+              if (index == 1) return _buildHorizontalList();
+              if (index == 2) return _buildSectionTitle("🎧 Рекомендуем");
+              return _buildHorizontalList();
+            },
+            childCount: 4,
+          ),
+        );
+      },
     );
   }
 
@@ -121,7 +166,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Positioned.fill(top:150,child: _buildSoundWave(),),
+        Positioned.fill(
+          top: 150,
+          child: _buildSoundWave(),
+        ),
         Positioned(
           top: 200,
           left: 60,
@@ -209,14 +257,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.9),
-            
             borderRadius: BorderRadius.circular(8),
           ),
         );
       },
     );
   }
-
 
   // **Обновленная кнопка Play**
   Widget _buildPlayButton() {
@@ -250,7 +296,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
@@ -265,9 +310,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildCategories() {
+    return FutureBuilder<List<Track>>(
+      future: fetchTracks(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 100, // 📌 Избегаем скачков в UI
+            child: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Ошибка: ${snapshot.error}',
+              style: const TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          );
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Нет доступных треков',
+              style: TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        // ✅ Группируем треки по категориям
+        Map<String, List<Track>> categoryTracks = {};
+        for (var track in snapshot.data!) {
+          categoryTracks.putIfAbsent(track.genre, () => []).add(track);
+        }
+
+        // Если категорий нет, просто возвращаем пустой контейнер
+        if (categoryTracks.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: categoryTracks.entries.map((entry) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle("🎵 ${entry.key.toUpperCase()}"),
+                _buildCategoryList(entry.value),
+              ],
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoryList(List<Track> tracks) {
+    return SizedBox(
+      height: 180, // Фиксируем высоту
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: tracks.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemBuilder: (context, index) {
+          return _buildMusicCard(tracks[index]);
+        },
+      ),
+    );
+  }
+
   Widget _buildHorizontalList() {
     return StreamBuilder<List<Track>>(
-      stream: _trackStream(), // 🔥 Используем Stream вместо Future
+      stream: _trackStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -306,8 +419,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+
   Widget _buildMusicCard(Track track) {
-    return Container(
+  return GestureDetector(
+    onTap: () {
+      final player = Provider.of<MusicPlayerProvider>(context, listen: false);
+      final audioUrl = "https://7cd3-2-135-31-28.ngrok-free.app/api/music/play?path=${Uri.encodeComponent(track.genre)}/${Uri.encodeComponent(track.title)}.mp3";
+        
+      // print();
+
+
+      player.setTrack(audioUrl, track.title, "Unknown Artist", track.imageUrl);
+    },
+    child: Container(
       width: 160,
       margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
@@ -316,43 +440,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min, // 🔥 Ограничиваем размер
+        mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-            child: Image.network(track.imageUrl,
-                width: double.infinity, height: 120, fit: BoxFit.cover),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+            child: Image.network(
+              track.imageUrl,
+              width: double.infinity,
+              height: 120,
+              fit: BoxFit.cover,
+            ),
           ),
           Expanded(
-            // 🔥 Исправляет выход текста за границы
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 track.title,
-                maxLines: 2, // 🔥 Ограничиваем до 2 строк
-                overflow: TextOverflow.ellipsis, // 🔥 Добавляем "..."
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+
+
 }
 
 class Track {
   final String title;
   final String imageUrl;
+  final String genre; // 📌 Добавляем жанр
 
-  Track({required this.title, required this.imageUrl});
+  Track({required this.title, required this.imageUrl, required this.genre});
 
   factory Track.fromJson(String genre, String filename) {
     return Track(
-      title: filename.replaceAll('.mp3', '-main.png'),
+      title: filename.replaceAll('.mp3', ''),
       imageUrl:
           "https://7cd3-2-135-31-28.ngrok-free.app/images/${Uri.encodeComponent(genre)}/${Uri.encodeComponent(filename.replaceAll('.mp3', '-main.png'))}",
+      genre: genre, // 📌 Сохраняем жанр
     );
   }
 }
