@@ -1,3 +1,4 @@
+import 'package:dolby/constants/constants.dart';
 import 'package:dolby/providers/music_player_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   /// **Запрос API для получения списка треков**
   Future<List<Track>> fetchTracks() async {
     final response = await http.get(
-        Uri.parse('https://7cd3-2-135-31-28.ngrok-free.app/api/music/list'));
+        Uri.parse('$APIROOT/api/music/list'));
 
     if (response.statusCode == 200) {
       Map<String, dynamic> data = jsonDecode(response.body);
@@ -166,10 +167,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Positioned.fill(
+        // Фон или волна
+        Positioned(
           top: 150,
+          left: 0,
+          right: 0,
+          bottom: 0,
           child: _buildSoundWave(),
         ),
+
+        // Основной заголовок с кнопкой Play
         Positioned(
           top: 200,
           left: 60,
@@ -179,10 +186,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               _buildPlayButton(),
               const SizedBox(width: 20),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       "Моя волна",
                       maxLines: 1,
@@ -208,8 +215,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
         ),
+
+        // Кнопка профиля (раньше у неё не было корректного позиционирования)
         Positioned(
-          height: 80,
+          top: 20, // Чётко указываем расположение
+          left: 20, // Отступ слева для лучшего UI
           child: IconButton(
             onPressed: () {
               Scaffold.of(context).openDrawer();
@@ -419,57 +429,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-
   Widget _buildMusicCard(Track track) {
-  return GestureDetector(
-    onTap: () {
-      final player = Provider.of<MusicPlayerProvider>(context, listen: false);
-      final audioUrl = "https://7cd3-2-135-31-28.ngrok-free.app/api/music/play?path=${Uri.encodeComponent(track.genre)}/${Uri.encodeComponent(track.title)}.mp3";
-        
-      // print();
+    return GestureDetector(
+      onTap: () {
 
+        final player = Provider.of<MusicPlayerProvider>(context, listen: false);
+        final audioUrl =
+            "$APIROOT/api/music/play?path=${Uri.encodeComponent(track.genre)}/${Uri.encodeComponent(track.title)}.mp3";
 
-      player.setTrack(audioUrl, track.title, "Unknown Artist", track.imageUrl);
-    },
-    child: Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade900,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-            child: Image.network(
-              track.imageUrl,
-              width: double.infinity,
-              height: 120,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                track.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        player.addToQueueAndPlay(
+            audioUrl, track.title, "Unknown Artist", track.imageUrl);
+      },
+      child: Container(
+        width: 160,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade900,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(15)),
+              child: Image.network(
+                track.imageUrl,
+                width: double.infinity,
+                height: 120,
+                fit: BoxFit.cover,
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  track.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
-
-
+    );
+  }
 }
 
 class Track {
@@ -483,7 +491,7 @@ class Track {
     return Track(
       title: filename.replaceAll('.mp3', ''),
       imageUrl:
-          "https://7cd3-2-135-31-28.ngrok-free.app/images/${Uri.encodeComponent(genre)}/${Uri.encodeComponent(filename.replaceAll('.mp3', '-main.png'))}",
+          "$APIROOT/images/${Uri.encodeComponent(genre)}/${Uri.encodeComponent(filename.replaceAll('.mp3', '-main.png'))}",
       genre: genre, // 📌 Сохраняем жанр
     );
   }

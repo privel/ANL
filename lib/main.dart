@@ -156,45 +156,47 @@ class _MyHomePageState extends State<MyHomePage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return const FullMusicPlayer(); // Убираем ненужные параметры
+        return FullMusicPlayer(); // Убираем ненужные параметры
       },
     );
   }
-  
-    @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.black,
-    body: Column(
-      children: [
-        Expanded(
-          child: IndexedStack(
-            index: currentIndex,
-            children: pages,
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Column(
+        children: [
+          Expanded(
+            child: IndexedStack(
+              index: currentIndex,
+              children: pages,
+            ),
           ),
-        ),
 
-        // Музыкальный бар, который появится при воспроизведении музыки
-        Consumer<MusicPlayerProvider>(
-          builder: (context, player, _) {
-            if (player.currentSong.isEmpty) {
-              return const SizedBox.shrink();
-            }
+          // Музыкальный бар, который появится при воспроизведении музыки
+          Consumer<MusicPlayerProvider>(
+            builder: (context, player, _) {
+              if (player.currentSong.isEmpty) {
+                return const SizedBox.shrink();
+              }
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10), // Отступ над навбаром
-              child: MusicPlayerBar(
-                songTitle: player.currentSong,
-                artist: player.artist,
-                isPlaying: player.isPlaying,
-                onPlayPause: player.togglePlayPause,
-                onOpenFullPlayer: () => _showFullPlayer(context),
-              ),
-            );
-          },
-        ),
-      ],
-    ),
+              return Padding(
+                padding:
+                    const EdgeInsets.only(bottom: 10), // Отступ над навбаром
+                child: MusicPlayerBar(
+                  songTitle: player.currentSong,
+                  artist: player.artist,
+                  isPlaying: player.isPlaying,
+                  onPlayPause: () =>
+                      player.togglePlayPause(), // Добавляем () =>
+                  onOpenFullPlayer: () => _showFullPlayer(context),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       drawer: Drawer(
         backgroundColor: const Color(0xFF1A1A1A),
         child: ListView(
