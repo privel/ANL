@@ -156,46 +156,45 @@ class _MyHomePageState extends State<MyHomePage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return FullMusicPlayer(
-          songTitle: currentSong,
-          artist: artist,
-          isPlaying: isPlaying,
-          onPlayPause: (bool newState) {
-            setState(() {
-              isPlaying = newState;
-            });
-          },
-        );
+        return const FullMusicPlayer(); // Убираем ненужные параметры
       },
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          IndexedStack(
+  
+    @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Column(
+      children: [
+        Expanded(
+          child: IndexedStack(
             index: currentIndex,
             children: pages,
           ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 10,
-            child: Consumer<MusicPlayerProvider>(builder: (context, player, _) {
-              return MusicPlayerBar(
+        ),
+
+        // Музыкальный бар, который появится при воспроизведении музыки
+        Consumer<MusicPlayerProvider>(
+          builder: (context, player, _) {
+            if (player.currentSong.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10), // Отступ над навбаром
+              child: MusicPlayerBar(
                 songTitle: player.currentSong,
                 artist: player.artist,
                 isPlaying: player.isPlaying,
                 onPlayPause: player.togglePlayPause,
                 onOpenFullPlayer: () => _showFullPlayer(context),
-              );
-            }),
-          ),
-        ],
-      ),
+              ),
+            );
+          },
+        ),
+      ],
+    ),
       drawer: Drawer(
         backgroundColor: const Color(0xFF1A1A1A),
         child: ListView(
