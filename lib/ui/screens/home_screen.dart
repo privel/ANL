@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildPlayButton(),
+              _buildPlayButton(context),
               const SizedBox(width: 20),
               const Expanded(
                 child: Column(
@@ -274,37 +274,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // **Обновленная кнопка Play**
-  Widget _buildPlayButton() {
-    return ScaleTransition(
-      scale: _pulseController,
-      child: GestureDetector(
-        onTap: () {
-          print("🎵 Музыка запущена...");
-        },
-        child: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.6),
-                blurRadius: 35,
-                spreadRadius: 10,
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.play_arrow_rounded,
-            color: Colors.black,
-            size: 50,
+Widget _buildPlayButton(BuildContext context) {
+  return Consumer<MusicPlayerProvider>(
+    builder: (context, player, child) {
+      return ScaleTransition(
+        scale: _pulseController,
+        child: GestureDetector(
+          onTap: () async {
+            if (player.isPlaying) {
+              print("⏸ Останавливаю музыку...");
+              player.pause();
+            } else {
+              if (player.currentSong.isEmpty) {
+                print("🎵 Загружаю и запускаю случайный трек...");
+                await player.playRandomTrack();
+              } else {
+                print("▶️ Продолжаю воспроизведение...");
+                player.play();
+              }
+            }
+          },
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.6),
+                  blurRadius: 35,
+                  spreadRadius: 10,
+                ),
+              ],
+            ),
+            child: Icon(
+              player.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              color: Colors.black,
+              size: 50,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
+
+
 
   Widget _buildSectionTitle(String title) {
     return Padding(

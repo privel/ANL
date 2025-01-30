@@ -194,6 +194,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
+
 class MusicPlayerProvider extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
@@ -212,6 +213,8 @@ class MusicPlayerProvider extends ChangeNotifier {
   List<Map<String, String>> get queue => _queue;
   int get currentIndex => _currentIndex;
 
+
+
   MusicPlayerProvider() {
     _audioPlayer.playerStateStream.listen((state) {
       print("Состояние плеера: $state");
@@ -221,6 +224,8 @@ class MusicPlayerProvider extends ChangeNotifier {
       }
     });
   }
+
+  
 
   Future<void> setTrack(
       String url, String title, String artist, String imageUrl) async {

@@ -1,6 +1,10 @@
+import 'package:dolby/constants/constants.dart';
+import 'package:dolby/providers/music_player_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:provider/provider.dart';
 
 class SpotifySearchScreen extends StatefulWidget {
   @override
@@ -43,7 +47,7 @@ class _SpotifySearchScreenState extends State<SpotifySearchScreen>
     }
 
     final response = await http.get(
-      Uri.parse('https://7cd3-2-135-31-28.ngrok-free.app/api/music/list'),
+      Uri.parse('$APIROOT/api/music/list'),
     );
 
     if (response.statusCode == 200) {
@@ -173,43 +177,49 @@ class _SpotifySearchScreenState extends State<SpotifySearchScreen>
   }
 
   Widget _buildTrackTile(Track track) {
-    return FadeTransition(
-      opacity: _animationController,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            track.imageUrl,
+  return FadeTransition(
+    opacity: _animationController,
+    child: ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          track.imageUrl,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Container(
             width: 50,
             height: 50,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 50,
-              height: 50,
-              color: Colors.grey[800],
-              child: const Icon(Icons.music_note, color: Colors.white),
-            ),
+            color: Colors.grey[800],
+            child: const Icon(Icons.music_note, color: Colors.white),
           ),
         ),
-        title: Text(
-          track.title,
-          style: const TextStyle(color: Colors.white),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          track.genre,
-          style: const TextStyle(color: Colors.white70),
-        ),
-        trailing: const Icon(Icons.play_arrow, color: Colors.white),
-        onTap: () {
-          // Здесь можно добавить переход на экран плеера
-          print("▶ Воспроизведение: ${track.title}");
-        },
       ),
-    );
-  }
+      title: Text(
+        track.title,
+        style: const TextStyle(color: Colors.white),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        track.genre,
+        style: const TextStyle(color: Colors.white70),
+      ),
+      trailing: const Icon(Icons.play_arrow, color: Colors.white),
+      onTap: () {
+        final player = Provider.of<MusicPlayerProvider>(context, listen: false);
+
+        final audioUrl =
+            "$APIROOT/api/music/play?path=${Uri.encodeComponent(track.genre)}/${Uri.encodeComponent(track.title)}.mp3";
+
+        // Вызов метода для установки и воспроизведения трека
+        player.setTrack(audioUrl, track.title, track.genre, track.imageUrl);
+      },
+    ),
+  );
+}
+
 
   Widget _buildLoadingSkeleton() {
     return ListView.builder(
@@ -257,7 +267,7 @@ class Track {
       title: filename.replaceAll('.mp3', ''),
       genre: genre,
       imageUrl:
-          "https://7cd3-2-135-31-28.ngrok-free.app/images/${Uri.encodeComponent(genre)}/${Uri.encodeComponent(filename.replaceAll('.mp3', '-main.png'))}",
+          "$APIROOT/images/${Uri.encodeComponent(genre)}/${Uri.encodeComponent(filename.replaceAll('.mp3', '-main.png'))}",
     );
   }
 }
