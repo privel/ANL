@@ -32,23 +32,29 @@ class _FullMusicPlayerState extends State<FullMusicPlayer> {
               // Обложка трека
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.network(
-                  player.imageUrl, // Обложка из провайдера
-                  width: 250,
-                  height: 250,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.music_note,
-                    size: 100,
-                    color: Colors.white54,
-                  ),
-                ),
+                child: player.imageUrl.isNotEmpty
+                    ? Image.network(
+                        player.imageUrl,
+                        width: 250,
+                        height: 250,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.music_note,
+                          size: 100,
+                          color: Colors.white54,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.music_note,
+                        size: 100,
+                        color: Colors.white54,
+                      ),
               ),
               const SizedBox(height: 20),
 
               // Название трека и артист
               Text(
-                player.currentSong,
+                player.currentSong.isNotEmpty ? player.currentSong : "Нет трека",
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     color: Colors.white,
@@ -56,7 +62,7 @@ class _FullMusicPlayerState extends State<FullMusicPlayer> {
                     fontWeight: FontWeight.bold),
               ),
               Text(
-                player.artist,
+                player.artist.isNotEmpty ? player.artist : "Неизвестный артист",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade400, fontSize: 18),
               ),
@@ -69,7 +75,9 @@ class _FullMusicPlayerState extends State<FullMusicPlayer> {
                   IconButton(
                     icon: const Icon(Icons.skip_previous,
                         color: Colors.white, size: 40),
-                    onPressed: player.seekToPrevious, // Переключение на предыдущий трек
+                    onPressed: player.queue.isNotEmpty && player.currentIndex > 0
+                        ? player.previousTrack
+                        : null, // Отключаем, если предыдущего трека нет
                   ),
                   IconButton(
                     icon: Icon(
@@ -84,7 +92,9 @@ class _FullMusicPlayerState extends State<FullMusicPlayer> {
                   IconButton(
                     icon: const Icon(Icons.skip_next,
                         color: Colors.white, size: 40),
-                    onPressed: player.seekToNext, // Переключение на следующий трек
+                    onPressed: (){
+                      player.nextTrack();
+                      }// Отключаем, если следующего трека нет
                   ),
                 ],
               ),
@@ -100,12 +110,14 @@ class _FullMusicPlayerState extends State<FullMusicPlayer> {
                   return Column(
                     children: [
                       Slider(
-                        value: currentPosition.inSeconds.toDouble(),
-                        max: totalDuration.inSeconds.toDouble(),
+                        value: currentPosition.inSeconds.toDouble().clamp(0, totalDuration.inSeconds.toDouble()),
+                        max: totalDuration.inSeconds.toDouble() > 0
+                            ? totalDuration.inSeconds.toDouble()
+                            : 1, // Чтобы избежать NaN
                         onChanged: (value) {
                           player.seek(Duration(seconds: value.toInt())); // Перемотка
                         },
-                        activeColor: Colors.green ,
+                        activeColor: Colors.green,
                         inactiveColor: Colors.grey,
                       ),
                       Row(
