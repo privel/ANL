@@ -1,7 +1,7 @@
-import 'package:dolby/ui/auth/login_screen.dart';
-import 'package:dolby/ui/widgets/navigator_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:dolby/ui/screens/home_screen.dart';
+import 'package:dolby/ui/widgets/navigator_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +21,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const MyHomePage(),
-      // home: LoginScreen(),
+      home: const MyHomePage(), // Исправленный вызов главного экрана
     );
   }
 }
@@ -35,29 +34,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int currentPageIndex = 0;
+  int currentIndex = 0;
 
-  // Список экранов, на которые будет переключаться навигация
   final List<Widget> pages = [
-    const Text(
-      "HOME",
-      style: TextStyle(color: Colors.white),
-    ),
-    const Text("search"),
-    const Text("My LIB"),
+    const HomeScreen(), // Главный экран
+    const Center(child: Text("Search", style: TextStyle(color: Colors.white))),
+    const Center(child: Text("Library", style: TextStyle(color: Colors.white))),
   ];
+
+  void _onTabSelected(int index) {
+    if (currentIndex != index) {
+      setState(() {
+        currentIndex = index;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1a1a1a),
-      body: pages[currentPageIndex],
+      backgroundColor: Colors.black,
+      body: IndexedStack(
+        index: currentIndex,
+        children: pages, // Сохранение состояния экранов
+      ),
       bottomNavigationBar: CustomNavigationBar(
-        currentIndex: currentPageIndex,
-        onTap: (index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
+        currentIndex: currentIndex,
+        onTap: _onTabSelected, // Исправленный обработчик
       ),
     );
   }

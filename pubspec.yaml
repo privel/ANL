@@ -66,6 +66,8 @@ flutter:
     - assets/icons/icon8-png/
     - assets/icons/icon8-svg/
     - assets/icons/
+    - assets/logo/11lols.png
+    - assets/logo/ANNA_ASTI_-_-main
     
   # To add assets to your application, add an assets section, like this:
   # assets:
