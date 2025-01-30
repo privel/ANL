@@ -121,10 +121,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Positioned.fill(child: _buildSoundWave()),
+        Positioned.fill(top:150,child: _buildSoundWave(),),
         Positioned(
-          top: 120,
-          left: 20,
+          top: 200,
+          left: 60,
           right: 20,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,18 +146,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         letterSpacing: 1.2,
                       ),
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      "Персональная подборка треков",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 18,
-                      ),
-                    ),
+                    // SizedBox(height: 6),
+                    // Text(
+                    //   "Персональная подборка треков",
+                    //   style: TextStyle(
+                    //     color: Colors.white70,
+                    //     fontSize: 18,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
             ],
+          ),
+        ),
+        Positioned(
+          height: 80,
+          child: IconButton(
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+            icon: const Icon(
+              Icons.person,
+              size: 24,
+              color: Colors.white,
+            ),
           ),
         ),
       ],
@@ -166,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildSoundWave() {
     return Positioned(
-      bottom: 80,
+      bottom: 150,
       left: 20,
       right: 20,
       child: AnimatedBuilder(
@@ -196,6 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.9),
+            
             borderRadius: BorderRadius.circular(8),
           ),
         );
@@ -203,6 +217,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+
+  // **Обновленная кнопка Play**
   Widget _buildPlayButton() {
     return ScaleTransition(
       scale: _pulseController,
@@ -211,18 +227,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           print("🎵 Музыка запущена...");
         },
         child: Container(
-          width: 80,
-          height: 80,
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.6),
+                blurRadius: 35,
+                spreadRadius: 10,
+              ),
+            ],
           ),
-          child: const Icon(Icons.play_arrow_rounded,
-              color: Colors.black, size: 50),
+          child: const Icon(
+            Icons.play_arrow_rounded,
+            color: Colors.black,
+            size: 50,
+          ),
         ),
       ),
     );
   }
+
 
   Widget _buildSectionTitle(String title) {
     return Padding(
