@@ -282,14 +282,11 @@ Widget _buildPlayButton(BuildContext context) {
         child: GestureDetector(
           onTap: () async {
             if (player.isPlaying) {
-              print("⏸ Останавливаю музыку...");
               player.pause();
             } else {
               if (player.currentSong.isEmpty) {
-                print("🎵 Загружаю и запускаю случайный трек...");
                 await player.playRandomTrack();
               } else {
-                print("▶️ Продолжаю воспроизведение...");
                 player.play();
               }
             }
@@ -398,7 +395,7 @@ Widget _buildPlayButton(BuildContext context) {
         itemCount: tracks.length,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemBuilder: (context, index) {
-          return _buildMusicCard(tracks[index]);
+          return _buildMusicCard(tracks[index],context);
         },
       ),
     );
@@ -430,7 +427,7 @@ Widget _buildPlayButton(BuildContext context) {
             itemCount: tracks.length,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) {
-              return _buildMusicCard(tracks[index]);
+              return _buildMusicCard(tracks[index],context);
             },
           ),
         );
@@ -445,55 +442,53 @@ Widget _buildPlayButton(BuildContext context) {
     }
   }
 
-  Widget _buildMusicCard(Track track) {
-    return GestureDetector(
-      onTap: () {
+ Widget _buildMusicCard(Track track, BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      final player = Provider.of<MusicPlayerProvider>(context, listen: false);
+      final audioUrl = "$APIROOT/api/music/play?path=${Uri.encodeComponent(track.genre)}/${Uri.encodeComponent(track.title)}.mp3";
 
-        final player = Provider.of<MusicPlayerProvider>(context, listen: false);
-        final audioUrl =
-            "$APIROOT/api/music/play?path=${Uri.encodeComponent(track.genre)}/${Uri.encodeComponent(track.title)}.mp3";
-
-        player.addToQueueAndPlay(
-            audioUrl, track.title, "Unknown Artist", track.imageUrl);
-      },
-      child: Container(
-        width: 160,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade900,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.network(
-                track.imageUrl,
-                width: double.infinity,
-                height: 120,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  track.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
+      // Добавляем трек и сразу воспроизводим его
+      player.addToQueueAndPlay(audioUrl, track.title, "Unknown Artist", track.imageUrl);
+    },
+    child: Container(
+      width: 160,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade900,
+        borderRadius: BorderRadius.circular(15),
       ),
-    );
-  }
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+            child: Image.network(
+              track.imageUrl,
+              width: double.infinity,
+              height: 120,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                track.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 }
 
 class Track {

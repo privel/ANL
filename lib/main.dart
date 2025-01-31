@@ -1,3 +1,4 @@
+import 'package:dolby/models/song_model.dart';
 import 'package:dolby/providers/music_player_provider.dart';
 import 'package:dolby/ui/screens/favorites_provider.dart';
 import 'package:dolby/services/auth_service.dart';
@@ -16,6 +17,7 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
   runApp(
     ChangeNotifierProvider(
       create: (context) => MusicPlayerProvider(),
@@ -180,16 +182,20 @@ class _MyHomePageState extends State<MyHomePage> {
               if (player.currentSong.isEmpty) {
                 return const SizedBox.shrink();
               }
-
+              
               return Padding(
                 padding:
                     const EdgeInsets.only(bottom: 10), // Отступ над навбаром
                 child: MusicPlayerBar(
-                  songTitle: player.currentSong,
-                  artist: player.artist,
+                  song: SongModel(
+                    id: player.currentSong, // Динамически получаем ID песни
+                    title: player.currentSong,
+                    artist: player.artist,
+                    imageUrl: player.imageUrl,
+                    url_track: player.track_url,
+                  ),
                   isPlaying: player.isPlaying,
-                  onPlayPause: () =>
-                      player.togglePlayPause(), // Добавляем () =>
+                  onPlayPause: () => player.togglePlayPause(),
                   onOpenFullPlayer: () => _showFullPlayer(context),
                 ),
               );
