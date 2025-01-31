@@ -80,22 +80,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         top: MediaQuery.of(context).size.height * 0.06,
                       ),
                       child: Stack(
+                        alignment: Alignment.center,
                         children: [
+                          Image.asset(
+                            'assets/icons/icon8-png/icons8-dolby-digital-144.png',
+                            width: MediaQuery.of(context).size.width *
+                                0.4, // Адаптивный размер
+                          ),
                           Positioned(
-                            top: MediaQuery.of(context).size.height * 0.16,
-                            left: MediaQuery.of(context).size.width * 0.09,
+                            bottom: MediaQuery.of(context).size.height *
+                                0.001, // Сделать адаптивным
                             child: Text(
                               "Dolby",
                               style: GoogleFonts.getFont(
                                 "Inria Sans",
-                                fontSize: 26,
+                                fontSize: MediaQuery.of(context).size.width *
+                                    0.07, // Адаптивный размер
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                          ),
-                          Image.asset(
-                            'assets/icons/icon8-png/icons8-dolby-digital-144.png',
                           ),
                         ],
                       ),
